@@ -2,7 +2,7 @@
 import logging
 
 from gooddata_legacy2cloud.constants import TIME_MACROS
-from gooddata_legacy2cloud.helpers import get_cloud_id
+from gooddata_legacy2cloud.helpers import get_cloud_id, is_computed_attribute
 from gooddata_legacy2cloud.metrics.attribute_element import AttributeElement
 from gooddata_legacy2cloud.metrics.contants import DELETED_VALUE, MISSING_VALUE
 from gooddata_legacy2cloud.metrics.data_classes import MetricContext
@@ -302,9 +302,12 @@ class ContentTreeModifier:
                             "parent": object_item["parent"],
                         }
                     else:
+                        attribute_id = obj["attribute"]["meta"]["identifier"]
                         objects_map[key] = {
-                            "id": obj["attribute"]["meta"]["identifier"],
-                            "type": "label",
+                            "id": attribute_id,
+                            "type": "computed_attribute"
+                            if is_computed_attribute(attribute_id)
+                            else "label",
                             "parent": object_item["parent"],
                         }
                 elif "metric" in obj:

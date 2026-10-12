@@ -8,6 +8,11 @@ import csv
 import logging
 import os
 
+from gooddata_legacy2cloud.helpers import (
+    computed_attribute_cloud_id,
+    is_computed_attribute,
+)
+
 logger = logging.getLogger("migration")
 
 
@@ -70,6 +75,9 @@ class IdMappings:
         """
         if legacy_identifier in self.id_mapping:
             return self.id_mapping[legacy_identifier]
+
+        if is_computed_attribute(legacy_identifier):
+            return computed_attribute_cloud_id(legacy_identifier)
 
         raise ValueError(
             f"Search Cloud Id - Unknown Legacy identifier {legacy_identifier}"

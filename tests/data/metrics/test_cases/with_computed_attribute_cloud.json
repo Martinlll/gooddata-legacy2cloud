@@ -1,0 +1,17 @@
+[
+    {
+        "data": {
+            "id": "metric_with_computed_attribute_aaCompAttrMetric1",
+            "type": "metric",
+            "attributes": {
+                "title": "Metric with computed attribute",
+                "tags": [],
+                "description": "",
+                "content": {
+                    "format": "#,##0.00",
+                    "maql": "SELECT COUNT({computed_attribute/label.comp.computedAttr})"
+                }
+            }
+        }
+    }
+]

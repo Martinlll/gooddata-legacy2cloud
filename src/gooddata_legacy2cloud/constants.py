@@ -10,6 +10,7 @@ COLOR_RESET = "\033[0m"
 
 LDM_MAPPING_FILE = "ldm_mappings.csv"
 METRIC_MAPPING_FILE = "metric_mappings.csv"
+COMPUTED_ATTRIBUTE_MAPPING_FILE = "computed_attribute_mappings.csv"
 INSIGHT_MAPPING_FILE = "insight_mappings.csv"
 DASHBOARD_MAPPING_FILE = "dashboard_mappings.csv"
 REPORT_MAPPING_FILE = "report_mappings.csv"

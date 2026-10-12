@@ -1,0 +1,19 @@
+{
+    "data": {
+        "type": "computedAttribute",
+        "id": "label.comp.h29rLOz",
+        "attributes": {
+            "title": "Segments by Queue Time Buckets",
+            "description": "Time ranges to group segments based on their time in queue.",
+            "tags": [
+                "_lcm_managed_object",
+                "embed",
+                "release"
+            ],
+            "dataType": "STRING",
+            "content": {
+                "maql": "SELECT CASE WHEN SUM({metric/aeB03p0tbrQw}) <= 9 THEN \"00:00-00:09\" WHEN SUM({metric/aeB03p0tbrQw}) <= 19 THEN \"00:10-00:19\" WHEN SUM({metric/aeB03p0tbrQw}) <= 29 THEN \"00:20-00:29\" WHEN SUM({metric/aeB03p0tbrQw}) <= 39 THEN \"00:30-00:39\" WHEN SUM({metric/aeB03p0tbrQw}) <= 49 THEN \"00:40-00:49\" WHEN SUM({metric/aeB03p0tbrQw}) <= 59 THEN \"00:50-00:59\" WHEN SUM({metric/aeB03p0tbrQw}) <= 69 THEN \"01:00-01:09\" WHEN SUM({metric/aeB03p0tbrQw}) <= 79 THEN \"01:10-01:19\" WHEN SUM({metric/aeB03p0tbrQw}) <= 89 THEN \"01:20-01:29\" WHEN SUM({metric/aeB03p0tbrQw}) <= 99 THEN \"01:30-01:39\" WHEN SUM({metric/aeB03p0tbrQw}) <= 109 THEN \"01:40-01:49\" WHEN SUM({metric/aeB03p0tbrQw}) <= 119 THEN \"01:50-01:59\" WHEN SUM({metric/aeB03p0tbrQw}) <= 139 THEN \"02:00-02:19\" WHEN SUM({metric/aeB03p0tbrQw}) <= 159 THEN \"02:20-02:39\" WHEN SUM({metric/aeB03p0tbrQw}) <= 179 THEN \"02:40-02:59\" WHEN SUM({metric/aeB03p0tbrQw}) <= 199 THEN \"03:00-03:19\" WHEN SUM({metric/aeB03p0tbrQw}) <= 219 THEN \"03:20-03:39\" WHEN SUM({metric/aeB03p0tbrQw}) <= 239 THEN \"03:40-03:59\" WHEN SUM({metric/aeB03p0tbrQw}) <= 259 THEN \"04:00-04:19\" WHEN SUM({metric/aeB03p0tbrQw}) <= 279 THEN \"04:20-04:39\" WHEN SUM({metric/aeB03p0tbrQw}) <= 299 THEN \"04:40-04:59\" WHEN SUM({metric/aeB03p0tbrQw}) <= 359 THEN \"05:00-05:59\" WHEN SUM({metric/aeB03p0tbrQw}) <= 419 THEN \"06:00-06:59\" WHEN SUM({metric/aeB03p0tbrQw}) <= 479 THEN \"07:00-07:59\" WHEN SUM({metric/aeB03p0tbrQw}) <= 539 THEN \"08:00-08:59\" WHEN SUM({metric/aeB03p0tbrQw}) <= 599 THEN \"09:00-09:59\" WHEN SUM({metric/aeB03p0tbrQw}) <= 659 THEN \"10:00-10:59\" WHEN SUM({metric/aeB03p0tbrQw}) <= 719 THEN \"11:00-11:59\" WHEN SUM({metric/aeB03p0tbrQw}) <= 779 THEN \"12:00-12:59\" WHEN SUM({metric/aeB03p0tbrQw}) <= 839 THEN \"13:00-13:59\" WHEN SUM({metric/aeB03p0tbrQw}) <= 899 THEN \"14:00-14:59\" WHEN SUM({metric/aeB03p0tbrQw}) <= 959 THEN \"15:00-15:59\" WHEN SUM({metric/aeB03p0tbrQw}) <= 1019 THEN \"16:00-16:59\" WHEN SUM({metric/aeB03p0tbrQw}) <= 1079 THEN \"17:00-17:59\" WHEN SUM({metric/aeB03p0tbrQw}) <= 1139 THEN \"18:00-18:59\" WHEN SUM({metric/aeB03p0tbrQw}) <= 1199 THEN \"19:00-19:59\" WHEN SUM({metric/aeB03p0tbrQw}) > 1199 THEN \"20:00 +\" ELSE \"\" END BY {label/segment.segmentkey} ALL OTHER"
+            }
+        }
+    }
+}

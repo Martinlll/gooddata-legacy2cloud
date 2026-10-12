@@ -1,0 +1,63 @@
+[
+    {
+        "metric": {
+            "content": {
+                "format": "#,##0.00",
+                "tree": {
+                    "position": {
+                        "line": 1,
+                        "column": 14
+                    },
+                    "type": "metric",
+                    "content": [
+                        {
+                            "content": [
+                                {
+                                    "type": "function",
+                                    "value": "COUNT",
+                                    "position": {
+                                        "column": 21,
+                                        "line": 1
+                                    },
+                                    "content": [
+                                        {
+                                            "value": "/gdc/md/dinu996plcf6ajcp6wygnqn952uyom9u/obj/9001",
+                                            "type": "attribute object",
+                                            "position": {
+                                                "column": 28,
+                                                "line": 1
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "expression",
+                            "position": {
+                                "column": 21,
+                                "line": 1
+                            }
+                        }
+                    ]
+                },
+                "expression": "SELECT COUNT([/gdc/md/dinu996plcf6ajcp6wygnqn952uyom9u/obj/9001])"
+            },
+            "meta": {
+                "isProduction": 1,
+                "summary": "",
+                "contributor": "/gdc/account/profile/5cc081c981561ae1d3f81481b50f002c",
+                "updated": "2025-04-10 09:26:53",
+                "identifier": "aaCompAttrMetric1",
+                "tags": "",
+                "uri": "/gdc/md/dinu996plcf6ajcp6wygnqn952uyom9u/obj/9010",
+                "title": "Metric with computed attribute",
+                "created": "2025-04-10 09:24:10",
+                "category": "metric",
+                "deprecated": "0",
+                "author": "/gdc/account/profile/5cc081c981561ae1d3f81481b50f002c"
+            },
+            "links": {
+                "explain2": "/gdc/md/dinu996plcf6ajcp6wygnqn952uyom9u/obj/9010/explain2"
+            }
+        }
+    }
+]

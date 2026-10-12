@@ -1,0 +1,56 @@
+{
+    "attribute": {
+        "meta": {
+            "isProduction": 1,
+            "uri": "/gdc/md/dinu996plcf6ajcp6wygnqn952uyom9u/obj/4229",
+            "contributor": "/gdc/account/profile/5cc081c981561ae1d3f81481b50f002c",
+            "tags": "_lcm_managed_object embed release",
+            "created": "2025-02-03 06:05:20",
+            "category": "attribute",
+            "updated": "2026-09-01 09:10:38",
+            "author": "/gdc/account/profile/5cc081c981561ae1d3f81481b50f002c",
+            "identifier": "attr.comp.h29rLOz",
+            "deprecated": "0",
+            "summary": "Time ranges to group segments based on their time in queue.",
+            "title": "Segments by Queue Time Buckets"
+        },
+        "content": {
+            "pk": [
+                {
+                    "data": "/gdc/md/dinu996plcf6ajcp6wygnqn952uyom9u/obj/980",
+                    "type": "col"
+                }
+            ],
+            "displayForms": [
+                {
+                    "content": {
+                        "formOf": "/gdc/md/dinu996plcf6ajcp6wygnqn952uyom9u/obj/4229",
+                        "default": 1,
+                        "expression": "[/gdc/md/dinu996plcf6ajcp6wygnqn952uyom9u/obj/982]"
+                    },
+                    "links": {
+                        "elements": "/gdc/md/dinu996plcf6ajcp6wygnqn952uyom9u/obj/4230/elements"
+                    },
+                    "meta": {
+                        "updated": "2026-09-01 09:10:38",
+                        "deprecated": "0",
+                        "summary": "",
+                        "author": "/gdc/account/profile/5cc081c981561ae1d3f81481b50f002c",
+                        "identifier": "label.comp.h29rLOz",
+                        "title": "Segments by Queue Time Buckets",
+                        "isProduction": 1,
+                        "uri": "/gdc/md/dinu996plcf6ajcp6wygnqn952uyom9u/obj/4230",
+                        "contributor": "/gdc/account/profile/5cc081c981561ae1d3f81481b50f002c",
+                        "tags": "_lcm_managed_object",
+                        "category": "attributeDisplayForm",
+                        "created": "2025-02-03 06:05:20"
+                    }
+                }
+            ],
+            "rel": [
+                "to {attr.segment.segmentkey} as case when {aeB03p0tbrQw} <= 9 then {attr.comp.h29rLOz?\"00:00-00:09\"}, when {aeB03p0tbrQw} <= 19 then {attr.comp.h29rLOz?\"00:10-00:19\"}, when {aeB03p0tbrQw} <= 29 then {attr.comp.h29rLOz?\"00:20-00:29\"}, when {aeB03p0tbrQw} <= 39 then {attr.comp.h29rLOz?\"00:30-00:39\"}, when {aeB03p0tbrQw} <= 49 then {attr.comp.h29rLOz?\"00:40-00:49\"}, when {aeB03p0tbrQw} <= 59 then {attr.comp.h29rLOz?\"00:50-00:59\"}, when {aeB03p0tbrQw} <= 69 then {attr.comp.h29rLOz?\"01:00-01:09\"}, when {aeB03p0tbrQw} <= 79 then {attr.comp.h29rLOz?\"01:10-01:19\"}, when {aeB03p0tbrQw} <= 89 then {attr.comp.h29rLOz?\"01:20-01:29\"}, when {aeB03p0tbrQw} <= 99 then {attr.comp.h29rLOz?\"01:30-01:39\"}, when {aeB03p0tbrQw} <= 109 then {attr.comp.h29rLOz?\"01:40-01:49\"}, when {aeB03p0tbrQw} <= 119 then {attr.comp.h29rLOz?\"01:50-01:59\"}, when {aeB03p0tbrQw} <= 139 then {attr.comp.h29rLOz?\"02:00-02:19\"}, when {aeB03p0tbrQw} <= 159 then {attr.comp.h29rLOz?\"02:20-02:39\"}, when {aeB03p0tbrQw} <= 179 then {attr.comp.h29rLOz?\"02:40-02:59\"}, when {aeB03p0tbrQw} <= 199 then {attr.comp.h29rLOz?\"03:00-03:19\"}, when {aeB03p0tbrQw} <= 219 then {attr.comp.h29rLOz?\"03:20-03:39\"}, when {aeB03p0tbrQw} <= 239 then {attr.comp.h29rLOz?\"03:40-03:59\"}, when {aeB03p0tbrQw} <= 259 then {attr.comp.h29rLOz?\"04:00-04:19\"}, when {aeB03p0tbrQw} <= 279 then {attr.comp.h29rLOz?\"04:20-04:39\"}, when {aeB03p0tbrQw} <= 299 then {attr.comp.h29rLOz?\"04:40-04:59\"}, when {aeB03p0tbrQw} <= 359 then {attr.comp.h29rLOz?\"05:00-05:59\"}, when {aeB03p0tbrQw} <= 419 then {attr.comp.h29rLOz?\"06:00-06:59\"}, when {aeB03p0tbrQw} <= 479 then {attr.comp.h29rLOz?\"07:00-07:59\"}, when {aeB03p0tbrQw} <= 539 then {attr.comp.h29rLOz?\"08:00-08:59\"}, when {aeB03p0tbrQw} <= 599 then {attr.comp.h29rLOz?\"09:00-09:59\"}, when {aeB03p0tbrQw} <= 659 then {attr.comp.h29rLOz?\"10:00-10:59\"}, when {aeB03p0tbrQw} <= 719 then {attr.comp.h29rLOz?\"11:00-11:59\"}, when {aeB03p0tbrQw} <= 779 then {attr.comp.h29rLOz?\"12:00-12:59\"}, when {aeB03p0tbrQw} <= 839 then {attr.comp.h29rLOz?\"13:00-13:59\"}, when {aeB03p0tbrQw} <= 899 then {attr.comp.h29rLOz?\"14:00-14:59\"}, when {aeB03p0tbrQw} <= 959 then {attr.comp.h29rLOz?\"15:00-15:59\"}, when {aeB03p0tbrQw} <= 1019 then {attr.comp.h29rLOz?\"16:00-16:59\"}, when {aeB03p0tbrQw} <= 1079 then {attr.comp.h29rLOz?\"17:00-17:59\"}, when {aeB03p0tbrQw} <= 1139 then {attr.comp.h29rLOz?\"18:00-18:59\"}, when {aeB03p0tbrQw} <= 1199 then {attr.comp.h29rLOz?\"19:00-19:59\"}, when {aeB03p0tbrQw} > 1199 then {attr.comp.h29rLOz?\"20:00 +\"} else {attr.comp.h29rLOz?\"\"} end"
+            ],
+            "dimension": "/gdc/md/dinu996plcf6ajcp6wygnqn952uyom9u/obj/4206"
+        }
+    }
+}

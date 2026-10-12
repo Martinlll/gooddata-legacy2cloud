@@ -1,0 +1,63 @@
+[
+    {
+        "visualizationObject": {
+            "meta": {
+                "updated": "2025-04-10 09:25:16",
+                "deprecated": "0",
+                "uri": "/gdc/md/dinu996plcf6ajcp6wygnqn952uyom9u/obj/4839",
+                "contributor": "/gdc/account/profile/5cc081c981561ae1d3f81481b50f002c",
+                "created": "2025-04-10 09:25:16",
+                "category": "visualizationObject",
+                "title": "Avg item price per category",
+                "isProduction": 1,
+                "summary": "",
+                "author": "/gdc/account/profile/5cc081c981561ae1d3f81481b50f002c",
+                "identifier": "abb6SWS81yFv",
+                "tags": "finance revenue"
+            },
+            "content": {
+                "buckets": [
+                    {
+                        "localIdentifier": "measures",
+                        "items": [
+                            {
+                                "measure": {
+                                    "localIdentifier": "97b94dad34c84bc39dd59342a448a9cb",
+                                    "definition": {
+                                        "measureDefinition": {
+                                            "item": {
+                                                "uri": "/gdc/md/dinu996plcf6ajcp6wygnqn952uyom9u/obj/4769"
+                                            },
+                                            "aggregation": "avg"
+                                        }
+                                    },
+                                    "format": "#,##0.00",
+                                    "title": "Avg Item Price"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "localIdentifier": "view",
+                        "items": [
+                            {
+                                "visualizationAttribute": {
+                                    "localIdentifier": "d6f211db045248f08cc861b88eecfe12",
+                                    "displayForm": {
+                                        "uri": "/gdc/md/dinu996plcf6ajcp6wygnqn952uyom9u/obj/9002"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "visualizationClass": {
+                    "uri": "/gdc/md/dinu996plcf6ajcp6wygnqn952uyom9u/obj/14"
+                }
+            },
+            "links": {
+                "explain": "/gdc/md/dinu996plcf6ajcp6wygnqn952uyom9u/obj/4839/explain"
+            }
+        }
+    }
+]

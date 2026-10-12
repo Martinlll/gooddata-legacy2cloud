@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from gooddata_legacy2cloud.dashboards.data_classes import DashboardContext
+from gooddata_legacy2cloud.helpers import cloud_display_form_type
 
 logger = logging.getLogger("migration")
 
@@ -61,7 +62,7 @@ class DrillConverter:
         return {
             "identifier": {
                 "id": cloud_id,
-                "type": "label",  # Most Legacy attributes map to Cloud labels
+                "type": cloud_display_form_type(legacy_attribute_id),
             }
         }
 

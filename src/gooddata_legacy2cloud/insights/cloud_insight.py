@@ -8,7 +8,11 @@ import json
 import logging
 import uuid
 
-from gooddata_legacy2cloud.helpers import get_cloud_id, parse_legacy_tags
+from gooddata_legacy2cloud.helpers import (
+    cloud_display_form_type,
+    get_cloud_id,
+    parse_legacy_tags,
+)
 from gooddata_legacy2cloud.id_mappings import IdMappings
 from gooddata_legacy2cloud.insights.data_classes import InsightContext
 from gooddata_legacy2cloud.insights.period_comparison_insight import (
@@ -141,7 +145,10 @@ class CloudInsight:
     @staticmethod
     def _transform_filter_type_value(obj: dict) -> str:
         filter_type = obj["attributeDisplayForm"]["meta"]["category"].lower()
-        filter_type = "label" if filter_type == "attributedisplayform" else filter_type
+        if filter_type == "attributedisplayform":
+            return cloud_display_form_type(
+                obj["attributeDisplayForm"]["meta"]["identifier"]
+            )
         return filter_type
 
     def _process_cyclical_date_filter(
