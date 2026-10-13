@@ -11,6 +11,7 @@ import uuid
 from gooddata_legacy2cloud.helpers import (
     cloud_display_form_type,
     get_cloud_id,
+    is_computed_attribute,
     parse_legacy_tags,
 )
 from gooddata_legacy2cloud.id_mappings import IdMappings
@@ -357,13 +358,15 @@ class CloudInsight:
     def _transform_bucket(
         self, mapping: IdMappings, bucket: dict, legacy_object: dict, bucket_type: str
     ):
-        cloud_id = mapping.search_mapping_identifier(
-            legacy_object[bucket_type]["meta"]["identifier"]
-        )
+        legacy_id = legacy_object[bucket_type]["meta"]["identifier"]
+        cloud_id = mapping.search_mapping_identifier(legacy_id)
         bucket["measure"]["definition"]["measureDefinition"]["item"] = {
             "identifier": {
                 "id": cloud_id,
-                "type": legacy_object[bucket_type]["meta"]["category"],
+                # COUNT(attr.comp.X) has to reference the computed attribute entity
+                "type": "computedAttribute"
+                if is_computed_attribute(legacy_id)
+                else legacy_object[bucket_type]["meta"]["category"],
             }
         }
         bucket["measure"]["definition"]["measureDefinition"]["filters"] = (

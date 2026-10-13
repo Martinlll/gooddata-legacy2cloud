@@ -572,7 +572,7 @@ gooddata-legacy2cloud dashboard-permissions
 **What this script does:**
 
 1. Fetches selected Legacy dashboards based on filter parameters
-2. Identifies the creator (account that created the dashboard) from Legacy
+2. Identifies the creator (`author`) and last modifier (`contributor`) from Legacy
 3. Collects sharing information (grantees) from Legacy dashboard permissions
 4. Maps Legacy users to Cloud users based on either Legacy `email` field or Legacy `login` field
 5. Maps Legacy user groups to Cloud user groups based on group names
@@ -598,6 +598,10 @@ gooddata-legacy2cloud dashboard-permissions
 - User account executing the migration needs `org.MANAGE` permissions to update workspace layout via API
 
 **Dashboard Permissions-specific options:**
+
+**--include-metrics** - Also migrate creator/modifier of metrics (Legacy `author` → Cloud `createdBy`, Legacy `contributor` → Cloud `modifiedBy`). Metrics have no permissions, only these two fields are updated. Reads `metric_mappings.csv` (`--metric-mapping-file`).
+
+**--include-insights** - Also migrate creator/modifier of insights, same as above. Reads `insight_mappings.csv` (`--insight-mapping-file`).
 
 **--dump-layout** - Store the layout JSON locally before and after modifications for debugging purposes
 
@@ -636,6 +640,9 @@ gooddata-legacy2cloud dashboard-permissions --permission VIEW
 
 # Update with client prefix
 gooddata-legacy2cloud dashboard-permissions --client-prefix client1_ --legacy-ws client1_legacy_ws --cloud-ws client1_cloud_ws
+
+# Also set creator/modifier of metrics and insights
+gooddata-legacy2cloud dashboard-permissions --include-metrics --include-insights
 ```
 
 **Important notes:**

@@ -62,8 +62,25 @@ class DashboardPermissionsConfig(BaseConfig):
         + "is treated as default and also used for output, all files are used "
         + f"for input. Default: [{PIXEL_PERFECT_DASHBOARD_MAPPING_FILE}]",
     )
+    metric_mapping_file: list[str] = Field(
+        default_factory=lambda: [METRIC_MAPPING_FILE],
+        description=f"Metric mappings file name(s). Default: [{METRIC_MAPPING_FILE}]",
+    )
+    insight_mapping_file: list[str] = Field(
+        default_factory=lambda: [INSIGHT_MAPPING_FILE],
+        description="Insight mappings file name(s). "
+        + f"Default: [{INSIGHT_MAPPING_FILE}]",
+    )
 
     # Custom migration arguments
+    include_metrics: bool = Field(
+        default=False,
+        description="Also migrate creator/modifier of metrics",
+    )
+    include_insights: bool = Field(
+        default=False,
+        description="Also migrate creator/modifier of insights",
+    )
     dump_layout: bool = Field(
         default=False,
         description="Save the layout JSON before and after modifications",

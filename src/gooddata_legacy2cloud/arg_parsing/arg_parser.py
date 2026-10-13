@@ -648,6 +648,18 @@ def parse_dashboard_permission_cli_args() -> argparse.Namespace:
     add_object_filter_arguments(parser)
     add_dashboard_mapping_arguments(parser)
     add_pp_dashboard_mapping_arguments(parser)
+    add_metric_mapping_arguments(parser)
+    add_insight_mapping_arguments(parser)
+    parser.add_argument(
+        "--include-metrics",
+        action="store_true",
+        help="Also migrate creator/modifier (author/contributor) of metrics",
+    )
+    parser.add_argument(
+        "--include-insights",
+        action="store_true",
+        help="Also migrate creator/modifier (author/contributor) of insights",
+    )
     parser.add_argument(
         "--dump-layout",
         action="store_true",

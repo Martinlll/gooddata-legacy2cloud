@@ -15,11 +15,15 @@ def format_change_line(change: ActualChange) -> str:
         Formatted string containing dashboard, action, and target context.
     """
 
-    prefix = f"  Dashboard: '{change.dashboard_title}' (ID: {change.dashboard_id}) - "
+    prefix = (
+        f"  {change.object_type.capitalize()}: '{change.dashboard_title}' "
+        f"(ID: {change.dashboard_id}) - "
+    )
 
     if change.change_type == "creator_updated":
         return (
-            f"{prefix}Changed creator from '{change.old_value}' to '{change.new_value}'"
+            f"{prefix}Changed creator / modifier from '{change.old_value}' "
+            f"to '{change.new_value}'"
         )
 
     if change.change_type == "permission_removed":
