@@ -9,6 +9,7 @@ import json
 import logging
 
 from gooddata_legacy2cloud.backends.cloud.object_creator_strategy import (
+    CLOUD_SKIPPED_COMPUTED_ATTRIBUTES_FILE,
     CLOUD_SKIPPED_DASHBOARDS_FILE,
     CLOUD_SKIPPED_INSIGHTS_FILE,
     CLOUD_SKIPPED_METRICS_FILE,
@@ -164,6 +165,8 @@ class OutputWriter:
             filename = CLOUD_SKIPPED_DASHBOARDS_FILE
         elif object_type == "report":
             filename = CLOUD_SKIPPED_REPORTS_FILE
+        elif object_type == "computed_attribute":
+            filename = CLOUD_SKIPPED_COMPUTED_ATTRIBUTES_FILE
         else:
             raise ValueError(f"Unsupported object type: {object_type}")
 

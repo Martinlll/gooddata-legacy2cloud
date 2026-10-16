@@ -5,6 +5,7 @@ import logging
 from gooddata_legacy2cloud.dashboard_permissions.data_classes import (
     DashboardPermissionContext,
 )
+from gooddata_legacy2cloud.id_mappings import IdMappings
 from gooddata_legacy2cloud.layout.layout_manager import (
     update_object_creators_in_layout,
 )
@@ -47,6 +48,8 @@ class PermissionsUpdater:
         """
         self.ctx = context
         self.legacy_dashboards: list[dict] = []
+        self.legacy_metrics: list[dict] = []
+        self.legacy_insights: list[dict] = []
         self.legacy_user_map: dict[str, str] = {}
         self.cloud_user_map: dict[str, str] = {}
         self.user_mappings: dict[str, UserMapping] = {}
@@ -59,18 +62,26 @@ class PermissionsUpdater:
         self.identifier_plural = f"{self.identifier_type}s"
 
     def process_dashboards(
-        self, legacy_dashboards: list[dict]
+        self,
+        legacy_dashboards: list[dict],
+        legacy_metrics: list[dict] | None = None,
+        legacy_insights: list[dict] | None = None,
     ) -> tuple[list[ObjectUpdate], dict[str, int]]:
         """
-        Process Legacy dashboards and prepare permission updates.
+        Process Legacy dashboards (permissions + creators) and optionally
+        metrics and insights (creators only) and prepare layout updates.
 
         Args:
             legacy_dashboards: List of Legacy dashboard objects
+            legacy_metrics: List of Legacy metric objects
+            legacy_insights: List of Legacy insight objects
 
         Returns:
             tuple: (list of ObjectUpdate instances, skip statistics dictionary)
         """
         self.legacy_dashboards = legacy_dashboards
+        self.legacy_metrics = legacy_metrics or []
+        self.legacy_insights = legacy_insights or []
 
         # Fetch and map users
         self._fetch_and_map_users()
@@ -118,10 +129,12 @@ class PermissionsUpdater:
             legacy_users, self.identifier_type
         )
 
-        # Extract creator IDs
-        user_ids = extract_creator_modifier_ids(self.legacy_dashboards)
+        # Extract creator and modifier IDs
+        user_ids = extract_creator_modifier_ids(
+            self.legacy_dashboards + self.legacy_metrics + self.legacy_insights
+        )
         logger.info(
-            "Found %s unique creator %s in dashboards",
+            "Found %s unique creator/modifier %s in objects",
             len(user_ids),
             self.identifier_plural,
         )
@@ -317,7 +330,62 @@ class PermissionsUpdater:
             if update:
                 object_updates.append(update)
 
+        for objects, object_type, mappings in (
+            (self.legacy_metrics, "metric", self.ctx.metric_mappings),
+            (self.legacy_insights, "insight", self.ctx.insight_mappings),
+        ):
+            if objects:
+                logger.info("----Processing %ss----", object_type)
+            for obj in objects:
+                update = self._process_creator_only(
+                    obj, object_type, mappings, skip_stats
+                )
+                if update:
+                    object_updates.append(update)
+
         return object_updates, skip_stats
+
+    def _process_creator_only(
+        self,
+        obj: dict,
+        object_type: str,
+        mappings: IdMappings | None,
+        skip_stats: dict[str, int],
+    ) -> ObjectUpdate | None:
+        """Build a creator/modifier-only update for a metric or an insight."""
+        if not obj or len(obj) != 1 or mappings is None:
+            return None
+        root_obj = next(iter(obj.values()))
+        if not isinstance(root_obj, dict) or "meta" not in root_obj:
+            return None
+        meta = root_obj["meta"]
+        cloud_object_id = mappings.get_value_by_key(meta.get("identifier"))
+        if not cloud_object_id:
+            skip_stats["no_cloud_mapping"] += 1
+            return None
+        legacy_creator_id = self._extract_profile_id(meta.get("author"))
+        cloud_creator_id, creator_email = self._get_mapped_user(legacy_creator_id)
+        if not cloud_creator_id:
+            skip_stats["no_user_mapping"] += 1
+            logger.warning(
+                "Creator '%s' not mapped for %s '%s' - skipped",
+                creator_email or legacy_creator_id,
+                object_type,
+                meta.get("title", ""),
+            )
+            return None
+        legacy_modifier_id = self._extract_profile_id(meta.get("contributor"))
+        cloud_modifier_id, _ = self._get_mapped_user(legacy_modifier_id)
+        return ObjectUpdate(
+            legacy_object_id=meta.get("identifier"),
+            legacy_object_title=meta.get("title", ""),
+            cloud_object_id=cloud_object_id,
+            object_type=object_type,
+            legacy_creator_id=legacy_creator_id,
+            legacy_modifier_id=legacy_modifier_id,
+            cloud_creator_id=cloud_creator_id,
+            cloud_modifier_id=cloud_modifier_id,
+        )
 
     def _process_single_dashboard(
         self, obj: dict, idx: int, skip_stats: dict[str, int]
@@ -344,6 +412,8 @@ class PermissionsUpdater:
         creator_uri = dashboard_meta.get("author")
         legacy_creator_id = self._extract_profile_id(creator_uri)
         cloud_creator_id, creator_email = self._get_mapped_user(legacy_creator_id)
+        legacy_modifier_id = self._extract_profile_id(dashboard_meta.get("contributor"))
+        cloud_modifier_id, _ = self._get_mapped_user(legacy_modifier_id)
 
         # Process grantees if sharing is not skipped
         grantee_user_ids, grantee_mappings, grantee_group_ids, group_mappings = (
@@ -376,9 +446,9 @@ class PermissionsUpdater:
             cloud_object_id=cloud_object_id,
             object_type="dashboard",
             legacy_creator_id=legacy_creator_id,
-            legacy_modifier_id=None,
+            legacy_modifier_id=legacy_modifier_id,
             cloud_creator_id=cloud_creator_id,
-            cloud_modifier_id=None,
+            cloud_modifier_id=cloud_modifier_id,
             grantee_user_ids=grantee_user_ids if grantee_user_ids else None,
             grantee_group_ids=grantee_group_ids if grantee_group_ids else None,
         )

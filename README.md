@@ -377,10 +377,21 @@ Script generates:
 - MAQL transformation log to `metrics_maql.log`
 - Failed Cloud metrics to `cloud_failed_metrics.json`
 - Skipped objects IDs to `cloud_skipped_metrics.json`
+- Computed attribute mappings to `computed_attribute_mappings.csv`
+- Failed / skipped computed attributes to `cloud_failed_computed_attributes.json` / `cloud_skipped_computed_attributes.json`
+- Computed attribute dumps to `legacy_computed_attributes.json` / `cloud_computed_attributes.json` (with `--dump-legacy` / `--dump-cloud`)
 
 Script reads:
 
 - LDM mappings from `ldm_mappings.csv`
+
+Computed attributes:
+
+- Legacy computed attributes (`attr.comp.X` + `label.comp.X`) are migrated together with metrics as Cloud computed attributes with ID `label.comp.X`. The Legacy `CASE WHEN` definition is translated to `SELECT CASE WHEN SUM({metric/...}) <= n THEN "bucket" ... END BY {label/...} ALL OTHER`.
+- Metrics, insights and dashboards reference them as `{computed_attribute/label.comp.X}` / `"type": "computedAttribute"`.
+- Deployment order is: metrics → computed attributes → metrics using computed attributes.
+- Requires the `enableComputedAttributes` feature flag in Cloud, on the parent workspace and on every child workspace that uses them (it is not inherited). Cloud computed attributes are in Beta: exports, date dimension and period-over-period are not supported with them.
+- Only one-metric, numeric-threshold definitions are supported; other definitions are logged as errors and skipped.
 
 Notes:
 
@@ -561,7 +572,7 @@ gooddata-legacy2cloud dashboard-permissions
 **What this script does:**
 
 1. Fetches selected Legacy dashboards based on filter parameters
-2. Identifies the creator (account that created the dashboard) from Legacy
+2. Identifies the creator (`author`) and last modifier (`contributor`) from Legacy
 3. Collects sharing information (grantees) from Legacy dashboard permissions
 4. Maps Legacy users to Cloud users based on either Legacy `email` field or Legacy `login` field
 5. Maps Legacy user groups to Cloud user groups based on group names
@@ -587,6 +598,10 @@ gooddata-legacy2cloud dashboard-permissions
 - User account executing the migration needs `org.MANAGE` permissions to update workspace layout via API
 
 **Dashboard Permissions-specific options:**
+
+**--include-metrics** - Also migrate creator/modifier of metrics (Legacy `author` → Cloud `createdBy`, Legacy `contributor` → Cloud `modifiedBy`). Metrics have no permissions, only these two fields are updated. Reads `metric_mappings.csv` (`--metric-mapping-file`).
+
+**--include-insights** - Also migrate creator/modifier of insights, same as above. Reads `insight_mappings.csv` (`--insight-mapping-file`).
 
 **--dump-layout** - Store the layout JSON locally before and after modifications for debugging purposes
 
@@ -625,6 +640,9 @@ gooddata-legacy2cloud dashboard-permissions --permission VIEW
 
 # Update with client prefix
 gooddata-legacy2cloud dashboard-permissions --client-prefix client1_ --legacy-ws client1_legacy_ws --cloud-ws client1_cloud_ws
+
+# Also set creator/modifier of metrics and insights
+gooddata-legacy2cloud dashboard-permissions --include-metrics --include-insights
 ```
 
 **Important notes:**

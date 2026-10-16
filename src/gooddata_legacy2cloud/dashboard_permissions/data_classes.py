@@ -36,6 +36,7 @@ class ActualChange:
     new_value: str = field(default="")
     old_permission: str = field(default="")
     new_permission: str = field(default="")
+    object_type: str = field(default="dashboard")
 
 
 @dataclass(frozen=True)
@@ -67,3 +68,5 @@ class DashboardPermissionContext:
     keep_existing_permissions: bool = field(default=False)
     print_user_mappings: bool = field(default=False)
     client_prefix: str | None = field(default=None)
+    metric_mappings: IdMappings | None = field(default=None)
+    insight_mappings: IdMappings | None = field(default=None)

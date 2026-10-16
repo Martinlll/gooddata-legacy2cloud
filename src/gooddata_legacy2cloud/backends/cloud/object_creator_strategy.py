@@ -27,6 +27,8 @@ CLOUD_FAILED_DASHBOARDS_FILE = "cloud_failed_dashboards.json"
 CLOUD_FAILED_REPORTS_FILE = "cloud_failed_reports.json"
 CLOUD_FAILED_PP_DASHBOARDS_FILE = "cloud_failed_pp_dashboards.json"
 CLOUD_SKIPPED_METRICS_FILE = "cloud_skipped_metrics.json"
+CLOUD_FAILED_COMPUTED_ATTRIBUTES_FILE = "cloud_failed_computed_attributes.json"
+CLOUD_SKIPPED_COMPUTED_ATTRIBUTES_FILE = "cloud_skipped_computed_attributes.json"
 CLOUD_SKIPPED_INSIGHTS_FILE = "cloud_skipped_insights.json"
 CLOUD_SKIPPED_KPI_COMPARISON_INSIGHTS_FILE = (
     "cloud_skipped_kpi_comparison_insights.json"
@@ -145,6 +147,28 @@ class MetricCreationStrategy(CreationStrategy):
 
     def get_object_type(self) -> str:
         return "metric"
+
+
+class ComputedAttributeCreationStrategy(CreationStrategy):
+    """Strategy for creating computed attributes"""
+
+    def get_existing_objects(self) -> List[Dict]:
+        return self.cloud_client.get_computed_attributes()
+
+    def create_object(self, obj: T) -> Any:
+        return self.cloud_client.create_computed_attribute(obj)
+
+    def update_object(self, obj: T) -> Any:
+        return self.cloud_client.update_computed_attribute(obj["data"]["id"], obj)
+
+    def disable_object(self, obj: T, response: Response) -> Any:
+        return obj  # no placeholder for computed attributes
+
+    def get_object_link(self, domain: str, workspace_id: str, obj_id: str) -> str:
+        return f"{domain}/api/v1/entities/workspaces/{workspace_id}/computedAttributes/{obj_id}"
+
+    def get_object_type(self) -> str:
+        return "computed_attribute"
 
 
 class InsightCreationStrategy(CreationStrategy):
@@ -461,6 +485,12 @@ OBJECT_CONFIG: Dict[str, ObjectConfig] = {
         "strategy_class": MetricCreationStrategy,
         "failed_file": CLOUD_FAILED_METRICS_FILE,
         "skipped_file": CLOUD_SKIPPED_METRICS_FILE,
+        "log_file_mode": "w",
+    },
+    "computed_attribute": {
+        "strategy_class": ComputedAttributeCreationStrategy,
+        "failed_file": CLOUD_FAILED_COMPUTED_ATTRIBUTES_FILE,
+        "skipped_file": CLOUD_SKIPPED_COMPUTED_ATTRIBUTES_FILE,
         "log_file_mode": "w",
     },
     "insight": {

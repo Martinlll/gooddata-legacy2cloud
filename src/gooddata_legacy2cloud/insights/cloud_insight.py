@@ -8,7 +8,12 @@ import json
 import logging
 import uuid
 
-from gooddata_legacy2cloud.helpers import get_cloud_id, parse_legacy_tags
+from gooddata_legacy2cloud.helpers import (
+    cloud_display_form_type,
+    get_cloud_id,
+    is_computed_attribute,
+    parse_legacy_tags,
+)
 from gooddata_legacy2cloud.id_mappings import IdMappings
 from gooddata_legacy2cloud.insights.data_classes import InsightContext
 from gooddata_legacy2cloud.insights.period_comparison_insight import (
@@ -141,7 +146,10 @@ class CloudInsight:
     @staticmethod
     def _transform_filter_type_value(obj: dict) -> str:
         filter_type = obj["attributeDisplayForm"]["meta"]["category"].lower()
-        filter_type = "label" if filter_type == "attributedisplayform" else filter_type
+        if filter_type == "attributedisplayform":
+            return cloud_display_form_type(
+                obj["attributeDisplayForm"]["meta"]["identifier"]
+            )
         return filter_type
 
     def _process_cyclical_date_filter(
@@ -350,13 +358,15 @@ class CloudInsight:
     def _transform_bucket(
         self, mapping: IdMappings, bucket: dict, legacy_object: dict, bucket_type: str
     ):
-        cloud_id = mapping.search_mapping_identifier(
-            legacy_object[bucket_type]["meta"]["identifier"]
-        )
+        legacy_id = legacy_object[bucket_type]["meta"]["identifier"]
+        cloud_id = mapping.search_mapping_identifier(legacy_id)
         bucket["measure"]["definition"]["measureDefinition"]["item"] = {
             "identifier": {
                 "id": cloud_id,
-                "type": legacy_object[bucket_type]["meta"]["category"],
+                # COUNT(attr.comp.X) has to reference the computed attribute entity
+                "type": "computedAttribute"
+                if is_computed_attribute(legacy_id)
+                else legacy_object[bucket_type]["meta"]["category"],
             }
         }
         bucket["measure"]["definition"]["measureDefinition"]["filters"] = (

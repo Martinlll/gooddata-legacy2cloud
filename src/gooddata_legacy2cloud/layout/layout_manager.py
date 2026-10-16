@@ -11,6 +11,12 @@ from gooddata_legacy2cloud.user_management.data_classes import ObjectUpdate
 
 logger = logging.getLogger("migration")
 
+LAYOUT_SECTIONS = {
+    "dashboard": "analyticalDashboards",
+    "metric": "metrics",
+    "insight": "visualizationObjects",
+}
+
 
 def find_dashboard_in_layout(layout: dict, dashboard_id: str) -> dict | None:
     """
@@ -46,8 +52,9 @@ def update_object_creators_in_layout(
     """
     Updates creator fields and permissions in the layout for specified objects.
 
-    Modifies the createdBy field, modifiedBy field (if present), and permissions
-    in analyticalDashboards section, leaving all other sections and fields untouched.
+    Modifies the createdBy field and modifiedBy field (if present) of dashboards,
+    metrics and insights, and permissions of dashboards, leaving all other
+    sections and fields untouched.
 
     Args:
         layout: The workspace layout dictionary
@@ -63,56 +70,43 @@ def update_object_creators_in_layout(
     """
     updates_made = 0
     actual_changes: list[ActualChange] = []
-
-    # Navigate to analyticalDashboards section
     analytics = layout.get("analytics", {})
-    analytical_dashboards = analytics.get("analyticalDashboards", [])
 
-    # Create a mapping of Cloud dashboard IDs to update info
-    update_map = {obj.cloud_object_id: obj for obj in object_updates}
+    # Create a mapping of (object type, Cloud ID) to update info
+    update_map = {(obj.object_type, obj.cloud_object_id): obj for obj in object_updates}
+    found_keys = set()
 
-    # Track which dashboards were found in the layout
-    found_dashboard_ids = set()
-
-    # Update each dashboard
-    for dashboard in analytical_dashboards:
-        dashboard_id = dashboard.get("id")
-        if dashboard_id not in update_map:
-            continue
-        update_info = update_map[dashboard_id]
-        dashboard_title = dashboard.get("title", "Untitled")
-        dashboard_changes = []
-        dashboard_changes.extend(
-            _update_creator_fields(
-                dashboard,
-                dashboard_id,
-                dashboard_title,
-                update_info,
-                skip_creators,
+    for object_type, section in LAYOUT_SECTIONS.items():
+        for obj in analytics.get(section, []):
+            key = (object_type, obj.get("id"))
+            if key not in update_map:
+                continue
+            update_info = update_map[key]
+            title = obj.get("title", "Untitled")
+            changes = _update_creator_fields(
+                obj, key[1], title, update_info, skip_creators
             )
-        )
-        dashboard_changes.extend(
-            _sync_permissions(
-                dashboard,
-                dashboard_id,
-                dashboard_title,
-                update_info,
-                skip_creators,
-                skip_individual_grantees,
-                skip_group_grantees,
-                permission_level,
-                keep_existing_permissions,
-            )
-        )
-        if dashboard_changes:
-            for change in dashboard_changes:
+            if object_type == "dashboard":
+                changes.extend(
+                    _sync_permissions(
+                        obj,
+                        key[1],
+                        title,
+                        update_info,
+                        skip_creators,
+                        skip_individual_grantees,
+                        skip_group_grantees,
+                        permission_level,
+                        keep_existing_permissions,
+                    )
+                )
+            for change in changes:
                 actual_changes.append(change)
                 logger.info("%s", format_change_line(change))
-        updates_made += 1
-        found_dashboard_ids.add(dashboard_id)
+            updates_made += 1
+            found_keys.add(key)
 
-    # Calculate how many dashboards were not found in the layout
-    not_found_count = len(update_map) - len(found_dashboard_ids)
+    not_found_count = len(update_map) - len(found_keys)
 
     return layout, updates_made, not_found_count, actual_changes
 
@@ -124,24 +118,26 @@ def _update_creator_fields(
     update_info: ObjectUpdate,
     skip_creators: bool,
 ) -> list[ActualChange]:
-    """Update createdBy/modifiedBy metadata."""
+    """Update createdBy (Legacy author) and modifiedBy (Legacy contributor)."""
     if skip_creators or not update_info.has_creator_mapping:
         return []
     new_creator = update_info.cloud_creator_id or ""
+    new_modifier = update_info.cloud_modifier_id or new_creator
     old_creator = dashboard.get("createdBy", {}).get("id", "None")
-    if old_creator == new_creator:
+    old_modifier = dashboard.get("modifiedBy", {}).get("id", new_modifier)
+    if old_creator == new_creator and old_modifier == new_modifier:
         return []
-    user_ref = {"id": new_creator, "type": "user"}
-    dashboard["createdBy"] = user_ref
+    dashboard["createdBy"] = {"id": new_creator, "type": "user"}
     if "modifiedBy" in dashboard:
-        dashboard["modifiedBy"] = user_ref
+        dashboard["modifiedBy"] = {"id": new_modifier, "type": "user"}
     return [
         ActualChange(
             dashboard_id=dashboard_id,
             dashboard_title=dashboard_title,
             change_type="creator_updated",
-            old_value=old_creator,
-            new_value=new_creator,
+            old_value=f"{old_creator} / {old_modifier}",
+            new_value=f"{new_creator} / {new_modifier}",
+            object_type=update_info.object_type,
         )
     ]
 

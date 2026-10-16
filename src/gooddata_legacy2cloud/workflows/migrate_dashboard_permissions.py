@@ -134,17 +134,32 @@ def _load_legacy_dashboards(
     return dashboards
 
 
+def _load_mappings(
+    config: DashboardPermissionsConfig, files: list[str], label: str
+) -> IdMappings:
+    """Resolve mapping files (with client prefix) and load them."""
+    resolved, status = get_mapping_files(
+        files=files, client_prefix=config.common_config.client_prefix
+    )
+    logger.info("  %s mappings: %s", label, format_mapping_files_info(resolved, status))
+    return IdMappings(resolved)
+
+
 def _build_context(
     config: DashboardPermissionsConfig,
     legacy_client: LegacyClient,
     cloud_client: CloudClient,
     dashboard_mappings: IdMappings,
+    metric_mappings: IdMappings | None = None,
+    insight_mappings: IdMappings | None = None,
 ) -> DashboardPermissionContext:
     """Assemble context used by PermissionsUpdater."""
     return DashboardPermissionContext(
         legacy_client=legacy_client,
         cloud_client=cloud_client,
         dashboard_mappings=dashboard_mappings,
+        metric_mappings=metric_mappings,
+        insight_mappings=insight_mappings,
         use_email=config.use_email,
         skip_creators=config.skip_creators,
         skip_individual_grantees=config.skip_individual_grantees,
@@ -160,12 +175,10 @@ def _log_skip_stats(skip_stats: dict[str, int]) -> None:
     """Log statistics describing skipped dashboards."""
     no_mapping = skip_stats.get("no_cloud_mapping", 0)
     if no_mapping > 0:
-        logger.warning(
-            "Skipped %d dashboards: not found in dashboard_mappings.csv", no_mapping
-        )
+        logger.warning("Skipped %d objects: not found in mapping files", no_mapping)
     no_user = skip_stats.get("no_user_mapping", 0)
     if no_user > 0:
-        logger.warning("Skipped %d dashboards: creator not found in Cloud", no_user)
+        logger.warning("Skipped %d objects: creator not found in Cloud", no_user)
 
 
 def _apply_updates_if_needed(
@@ -177,7 +190,7 @@ def _apply_updates_if_needed(
     """Apply updates or log dry-run message based on CLI flags."""
     if config.common_config.skip_deploy:
         logger.info(
-            "[SKIP DEPLOY] Would update %d dashboard creator records",
+            "[SKIP DEPLOY] Would update %d object creator records",
             len(object_updates),
         )
         logger.info("(use without --skip-deploy to apply changes)")
@@ -217,12 +230,10 @@ def _apply_updates_if_needed(
 
     if original_hash == modified_hash:
         logger.info("No changes detected in layout - skipping API update")
-        logger.info(
-            "Processed %d dashboards (no permission changes needed)", updates_made
-        )
+        logger.info("Processed %d objects (no changes needed)", updates_made)
         if not_found_count > 0:
             logger.info(
-                "%d Dashboards from Legacy not found in Cloud layout",
+                "%d objects from Legacy not found in Cloud layout",
                 not_found_count,
             )
         return actual_changes
@@ -231,10 +242,10 @@ def _apply_updates_if_needed(
     response = cloud_client.update_workspace_layout(modified_layout)
     if response.status_code in (200, 204):
         logger.info("Layout updated successfully")
-        logger.info("Updated %d dashboards", updates_made)
+        logger.info("Updated %d objects", updates_made)
         if not_found_count > 0:
             logger.info(
-                "%d Dashboards from Legacy not found in Cloud layout",
+                "%d objects from Legacy not found in Cloud layout",
                 not_found_count,
             )
     else:
@@ -314,13 +325,37 @@ def migrate_dashboard_permissions(config: DashboardPermissionsConfig):
         dashboard_mappings,
     )
 
+    # Optionally load metrics and insights (creator/modifier only)
+    legacy_metrics: list[dict] = []
+    legacy_insights: list[dict] = []
+    metric_mappings = insight_mappings = None
+    if config.include_metrics:
+        metric_mappings = _load_mappings(config, config.metric_mapping_file, "Metric")
+        legacy_metrics = fetch_objects_with_filters(
+            legacy_client, "metric", filter_params, "metrics"
+        )
+    if config.include_insights:
+        insight_mappings = _load_mappings(
+            config, config.insight_mapping_file, "Insight"
+        )
+        legacy_insights = fetch_objects_with_filters(
+            legacy_client, "visualizationObject", filter_params, "insights"
+        )
+
     # Build context and create and instance of PermissionsUpdater
-    context = _build_context(config, legacy_client, cloud_client, dashboard_mappings)
+    context = _build_context(
+        config,
+        legacy_client,
+        cloud_client,
+        dashboard_mappings,
+        metric_mappings,
+        insight_mappings,
+    )
     permissions_updater = PermissionsUpdater(context)
 
-    # Process dashboards and build object updates
+    # Process objects and build layout updates
     object_updates, skip_stats = permissions_updater.process_dashboards(
-        legacy_dashboards
+        legacy_dashboards, legacy_metrics, legacy_insights
     )
 
     # Log skip statistics
@@ -329,7 +364,7 @@ def migrate_dashboard_permissions(config: DashboardPermissionsConfig):
         logger.info("----No objects to update----")
         legacy_client.logout()
         return
-    logger.info("Found mappings for %d dashboards", len(object_updates))
+    logger.info("Found mappings for %d objects", len(object_updates))
 
     # Apply updates if needed
     actual_changes = _apply_updates_if_needed(

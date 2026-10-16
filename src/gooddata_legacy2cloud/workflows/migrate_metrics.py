@@ -17,6 +17,7 @@ from gooddata_legacy2cloud.backends.legacy.filters import FilterParameters
 from gooddata_legacy2cloud.backends.legacy.objects import fetch_objects_with_filters
 from gooddata_legacy2cloud.config.configuration_objects import MetricConfig
 from gooddata_legacy2cloud.config.env_vars import EnvVars
+from gooddata_legacy2cloud.constants import COMPUTED_ATTRIBUTE_MAPPING_FILE
 from gooddata_legacy2cloud.helpers import (
     duration,
     prefix_filename,
@@ -33,6 +34,10 @@ from gooddata_legacy2cloud.mapping.mapping_utils import (
     get_mapping_files,
 )
 from gooddata_legacy2cloud.metrics.cloud_metrics_builder import CloudMetricsBuilder
+from gooddata_legacy2cloud.metrics.computed_attribute import (
+    build_cloud_computed_attributes,
+    fetch_legacy_computed_attributes,
+)
 from gooddata_legacy2cloud.metrics.data_classes import MetricContext
 from gooddata_legacy2cloud.metrics.element_prefetcher import ElementPrefetcher
 from gooddata_legacy2cloud.models.enums import Operation
@@ -40,6 +45,8 @@ from gooddata_legacy2cloud.output_writer import OutputWriter
 
 LEGACY_METRICS_FILE = "legacy_metrics.json"
 CLOUD_METRICS_FILE = "cloud_metrics.json"
+LEGACY_COMPUTED_ATTRIBUTES_FILE = "legacy_computed_attributes.json"
+CLOUD_COMPUTED_ATTRIBUTES_FILE = "cloud_computed_attributes.json"
 
 logger = logging.getLogger("migration")
 configure_logger()
@@ -141,6 +148,7 @@ def migrate_metrics(config: MetricConfig):
         ignore_folders=config.ignore_folders,
         suppress_warnings=config.object_migration_config.suppress_migration_warnings,
         client_prefix=config.common_config.client_prefix,
+        metric_mappings=metric_mappings,
     )
     metrics_builder = CloudMetricsBuilder(ctx)
     metrics_builder.process_legacy_metrics(legacy_metrics)
@@ -161,23 +169,67 @@ def migrate_metrics(config: MetricConfig):
         write_content_to_file(CLOUD_METRICS_FILE, json.dumps(cloud_metrics, indent=4))
         logger.info("Cloud metrics dumped to '%s'", prefix_filename(CLOUD_METRICS_FILE))
 
+    cloud_computed_attributes = migrate_computed_attributes(config, ctx)
+
     if not config.common_config.skip_deploy:
         if config.object_migration_config.overwrite_existing:
             operation = Operation.CREATE_OR_UPDATE_WITH_ERROR_FALLBACK
+            ca_operation = Operation.CREATE_OR_UPDATE_WITH_RETRY
         else:
             operation = Operation.CREATE_WITH_ERROR_FALLBACK
+            ca_operation = Operation.CREATE_WITH_RETRY
 
-        process_objects(
-            cloud_client,
-            cloud_metrics,
-            "metric",
-            operation,
-        )
+        # metrics -> computed attributes (built on metrics) -> metrics using them
+        metrics_on_ca = [
+            m
+            for m in cloud_metrics
+            if "{computed_attribute/" in m["data"]["attributes"]["content"]["maql"]
+        ]
+        plain_metrics = [m for m in cloud_metrics if m not in metrics_on_ca]
+
+        process_objects(cloud_client, plain_metrics, "metric", operation)
+        if cloud_computed_attributes:
+            process_objects(
+                cloud_client,
+                cloud_computed_attributes,
+                "computed_attribute",
+                ca_operation,
+            )
+        if metrics_on_ca:
+            process_objects(cloud_client, metrics_on_ca, "metric", operation)
 
     execution_time = duration(start_time)
     legacy_client.logout()
     logger.info("----DONE in %.2fs----", execution_time)
     logger.info("----Executed %d Cloud requests----", cloud_client.request_count.get())
+
+
+def migrate_computed_attributes(config: MetricConfig, ctx: MetricContext) -> list:
+    """Fetches, converts and maps Legacy computed attributes; returns Cloud ones."""
+    logger.info("----Fetching Legacy computed attributes----")
+    legacy_attributes = fetch_legacy_computed_attributes(ctx.legacy_client)
+    if config.object_migration_config.dump_legacy:
+        write_content_to_file(
+            LEGACY_COMPUTED_ATTRIBUTES_FILE, json.dumps(legacy_attributes, indent=4)
+        )
+
+    logger.info(
+        "----Processing Legacy computed attributes (%d)----", len(legacy_attributes)
+    )
+    cloud_attributes = build_cloud_computed_attributes(ctx, legacy_attributes)
+
+    mapping_writer = OutputWriter(COMPUTED_ATTRIBUTE_MAPPING_FILE)
+    for attribute in cloud_attributes:
+        cloud_id = attribute["data"]["id"]
+        legacy_id = "attr." + cloud_id.split(".", 1)[1]
+        mapping_writer.write_identifier_relation(legacy_id, cloud_id)
+        mapping_writer.write_identifier_relation(cloud_id, cloud_id)
+
+    if config.object_migration_config.dump_cloud:
+        write_content_to_file(
+            CLOUD_COMPUTED_ATTRIBUTES_FILE, json.dumps(cloud_attributes, indent=4)
+        )
+    return cloud_attributes
 
 
 def migrate_metrics_cli():

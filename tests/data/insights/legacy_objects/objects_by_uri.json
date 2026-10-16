@@ -517,5 +517,50 @@
       },
       "content": {}
     }
+  },
+  "/gdc/md/dinu996plcf6ajcp6wygnqn952uyom9u/obj/9001": {
+    "attribute": {
+      "content": {
+        "displayForms": [
+          {
+            "links": {
+              "elements": "/gdc/md/dinu996plcf6ajcp6wygnqn952uyom9u/obj/9002/elements"
+            },
+            "meta": {
+              "identifier": "attr.comp.computedAttr"
+            }
+          }
+        ]
+      },
+      "meta": {
+        "category": "attribute",
+        "identifier": "attr.comp.computedAttr"
+      }
+    }
+  },
+  "/gdc/md/dinu996plcf6ajcp6wygnqn952uyom9u/obj/9002": {
+    "attributeDisplayForm": {
+      "content": {
+        "expression": "[/gdc/md/dinu996plcf6ajcp6wygnqn952uyom9u/obj/4151]",
+        "formOf": "/gdc/md/dinu996plcf6ajcp6wygnqn952uyom9u/obj/9001"
+      },
+      "links": {
+        "elements": "/gdc/md/dinu996plcf6ajcp6wygnqn952uyom9u/obj/9002/elements"
+      },
+      "meta": {
+        "author": "/gdc/account/profile/5cc081c981561ae1d3f81481b50f002c",
+        "category": "attributeDisplayForm",
+        "contributor": "/gdc/account/profile/5cc081c981561ae1d3f81481b50f002c",
+        "created": "2025-04-09 17:05:22",
+        "deprecated": "0",
+        "identifier": "label.comp.computedAttr",
+        "isProduction": 1,
+        "summary": "",
+        "tags": "",
+        "title": "Computed Attr",
+        "updated": "2025-04-09 17:05:22",
+        "uri": "/gdc/md/dinu996plcf6ajcp6wygnqn952uyom9u/obj/9002"
+      }
+    }
   }
 }

@@ -257,6 +257,28 @@ class CloudClient:
         url = f"api/v1/entities/workspaces/{self.ws}/metrics/{metric_id}"
         return self._put(url, metric)
 
+    def get_computed_attributes(self, page=0, origin: str = "ALL"):
+        """Sends a GET request to the server to get all computed attributes."""
+        url = f"api/v1/entities/workspaces/{self.ws}/computedAttributes?origin={origin}&size={CLOUD_REQUEST_PAGE_SIZE}&page={page}"
+        try:
+            result = self._get(url)
+            data = result["data"]
+            if len(data) == CLOUD_REQUEST_PAGE_SIZE:
+                data.extend(self.get_computed_attributes(page + 1))
+            return data
+        except KeyError:
+            return []
+
+    def create_computed_attribute(self, computed_attribute):
+        """Post a computed attribute to the server."""
+        url = f"api/v1/entities/workspaces/{self.ws}/computedAttributes"
+        return self._post(url, computed_attribute)
+
+    def update_computed_attribute(self, computed_attribute_id, computed_attribute):
+        """Update a computed attribute on the server."""
+        url = f"api/v1/entities/workspaces/{self.ws}/computedAttributes/{computed_attribute_id}"
+        return self._put(url, computed_attribute)
+
     def remove_metric(self, metric_id):
         """Sends a DELETE request to the server."""
         url = f"api/v1/entities/workspaces/{self.ws}/metrics/{metric_id}"

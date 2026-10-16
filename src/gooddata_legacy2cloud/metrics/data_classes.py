@@ -20,3 +20,4 @@ class MetricContext:
         default=False
     )  # suppress migration warnings from objects
     client_prefix: str | None = field(default=None)
+    metric_mappings: IdMappings | None = field(default=None)

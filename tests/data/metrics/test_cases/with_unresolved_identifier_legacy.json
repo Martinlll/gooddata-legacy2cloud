@@ -21,7 +21,7 @@
                                     },
                                     "content": [
                                         {
-                                            "value": "/gdc/md/dinu996plcf6ajcp6wygnqn952uyom9u/obj/9001",
+                                            "value": "/gdc/md/dinu996plcf6ajcp6wygnqn952uyom9u/obj/9003",
                                             "type": "attribute object",
                                             "position": {
                                                 "column": 28,
@@ -39,7 +39,7 @@
                         }
                     ]
                 },
-                "expression": "SELECT COUNT([/gdc/md/dinu996plcf6ajcp6wygnqn952uyom9u/obj/9001])"
+                "expression": "SELECT COUNT([/gdc/md/dinu996plcf6ajcp6wygnqn952uyom9u/obj/9003])"
             },
             "meta": {
                 "isProduction": 1,

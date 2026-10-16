@@ -20,6 +20,7 @@ TEST_CASES_DIR = "tests/data/insights/test_cases"
     "case_file_name",
     [
         "basic_insight",
+        "with_computed_attribute",
         "with_missing_value_in_color_definition",
         "with_metric_value_filter",
         "with_top_filter",

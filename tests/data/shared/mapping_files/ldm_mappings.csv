@@ -103,3 +103,4 @@ attr.convertcurrency.currencycode,convertcurrency.currencycode
 label.convertcurrency.currencycode,convertcurrency.currencycode
 label.datasetwithformerpk.anotherattribute,datasetwithformerpk.anotherattribute
 attr.datasetwithformerpk.anotherattribute,datasetwithformerpk.anotherattribute
+attr.segment.segmentkey,segment.segmentkey

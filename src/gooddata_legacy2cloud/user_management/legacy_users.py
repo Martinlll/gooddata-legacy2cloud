@@ -31,8 +31,8 @@ def extract_creator_modifier_ids(objects: list[dict]) -> set[str]:
                     if creator_id:
                         user_ids.add(creator_id)
 
-                # Extract modifier ID from createdBy field (despite the name, it's the last modifier)
-                modifier = obj_meta.get("createdBy")
+                # Extract modifier ID (Bear `contributor` = last modifier)
+                modifier = obj_meta.get("contributor") or obj_meta.get("createdBy")
                 if modifier:
                     # Extract ID from URI like /gdc/account/profile/USER_ID
                     if modifier.startswith("/gdc/account/profile/"):

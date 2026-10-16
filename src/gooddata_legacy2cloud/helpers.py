@@ -170,6 +170,24 @@ def resolve_kpi_description(legacy_client: LegacyClient, obj: dict[str, Any]) ->
     return metric_obj["metric"]["meta"].get("summary", "")
 
 
+COMPUTED_ATTRIBUTE_PREFIXES = ("attr.comp.", "label.comp.")
+
+
+def is_computed_attribute(legacy_identifier: str) -> bool:
+    """Legacy computed attributes always use the attr.comp./label.comp. prefix."""
+    return legacy_identifier.startswith(COMPUTED_ATTRIBUTE_PREFIXES)
+
+
+def computed_attribute_cloud_id(legacy_identifier: str) -> str:
+    """Cloud computed attribute id is the Legacy label id (label.comp.X)."""
+    return "label." + legacy_identifier.split(".", 1)[1]
+
+
+def cloud_display_form_type(legacy_identifier: str) -> str:
+    """Entity type Cloud expects for a Legacy display form reference."""
+    return "computedAttribute" if is_computed_attribute(legacy_identifier) else "label"
+
+
 def get_cloud_id(title: str, legacy_identifier: str) -> str:
     """
     Returns the Cloud metric identifier.

@@ -2,7 +2,7 @@
 import logging
 
 from gooddata_legacy2cloud.dashboards.data_classes import DashboardContext
-from gooddata_legacy2cloud.helpers import get_cloud_id
+from gooddata_legacy2cloud.helpers import cloud_display_form_type, get_cloud_id
 from gooddata_legacy2cloud.metrics.attribute_element import AttributeElement
 from gooddata_legacy2cloud.metrics.contants import DELETED_VALUE
 from gooddata_legacy2cloud.models.cloud.filter_context import (
@@ -28,13 +28,18 @@ class FilterContext:
     @staticmethod
     def _transform_filter_type_value(obj: dict) -> str:
         filter_type = obj["attributeDisplayForm"]["meta"]["category"].lower()
-        filter_type = "label" if filter_type == "attributedisplayform" else filter_type
+        if filter_type == "attributedisplayform":
+            return cloud_display_form_type(
+                obj["attributeDisplayForm"]["meta"]["identifier"]
+            )
         return filter_type
 
     @staticmethod
     def _transform_attribute_type_value(obj: dict) -> str:
         attr_type = obj["attribute"]["meta"]["category"].lower()
-        return "label" if attr_type == "attribute" else attr_type
+        if attr_type == "attribute":
+            return cloud_display_form_type(obj["attribute"]["meta"]["identifier"])
+        return attr_type
 
     def _get_filter_attribute_elements(
         self, attribute_elements: list
