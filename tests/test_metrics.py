@@ -9,8 +9,11 @@ The test verifies that the transformation of Legacy metrics metadata matches
 the expected Cloud metrics metadata.
 """
 
+import dataclasses
+
 import pytest
 
+from gooddata_legacy2cloud.id_mappings import IdMappings
 from gooddata_legacy2cloud.metrics.cloud_metrics_builder import CloudMetricsBuilder
 from tests.test_utils import dicts_are_equal, load_json
 
@@ -67,3 +70,20 @@ def test_metrics_migration(
     for actual, expected in zip(actual_sorted, expected_sorted):
         dicts_are_equal(actual, expected)
         dicts_are_equal(expected, actual)
+
+
+def test_migrated_metrics_are_added_to_in_memory_mappings(
+    metrics_context,
+) -> None:
+    """Metrics migrated in this run must be resolvable by computed attributes."""
+    ctx = dataclasses.replace(metrics_context, metric_mappings=IdMappings())
+    legacy_metrics = load_json(f"{TEST_CASES_DIR}/basic_metric_legacy.json")
+    assert isinstance(legacy_metrics, list)
+
+    builder = CloudMetricsBuilder(ctx)
+    builder.process_legacy_metrics(legacy_metrics)
+
+    assert ctx.metric_mappings is not None
+    for cloud_metric in builder.get_cloud_metrics():
+        cloud_id = cloud_metric["data"]["id"]
+        assert cloud_id in ctx.metric_mappings.id_mapping.values()

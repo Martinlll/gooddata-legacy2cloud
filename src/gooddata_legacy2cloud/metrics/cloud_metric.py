@@ -49,6 +49,12 @@ class CloudMetric:
         self.ctx.mapping_logger.write_identifier_relation(
             self.meta["identifier"], self.cloud_metric_id
         )
+        # make the mapping visible to later steps of the same run
+        # (computed attributes look metrics up in `ctx.metric_mappings`)
+        if self.ctx.metric_mappings is not None:
+            self.ctx.metric_mappings.add_mapping_identifier(
+                self.meta["identifier"], self.cloud_metric_id
+            )
 
     def _get_tags(self):
         tags = parse_legacy_tags(self.meta)
